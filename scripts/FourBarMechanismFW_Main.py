@@ -31,6 +31,7 @@ class FourBarMechanism:
     linear_motion_range = np.array([])
     linear_motion_resolution = 0
     driver_speed = 0
+    theta = np.array([])
 
     
     def __init__(self, n_link = 4):
@@ -39,6 +40,10 @@ class FourBarMechanism:
         for i in range(0, n_link):
             self.lenghts = np.append(self.lenghts, 0)
             self.init_angles = np.append(self.init_angles, 0)
+
+        self.theta.resize(2)
+        self.theta[0] = self.init_angles[0]
+        self.theta[1] = self.init_angles[3]
 
     def __str__(self):
         return "Number of Links: {0} - Link Lengths: {1} - Inital Angles: {2} - Motion Range: {3} - Motion Speed: {4}".format(self.n_link, 
@@ -75,34 +80,67 @@ class FourBarMechanism:
     def getNumberOfLinks(self):
         return self.n_link
     
-    def mechanismEquations(self, phi, l, theta):
-        # phi and theta in radians
-        # phi is the vector of variables
-        # theta is the vector of known angles = [theta1, theta4]
+    def mechanismEquations(self, phi):
+        # phi is in radians
+        # phi = [theta2, theta3]
 
         y = np.arrray([])
 
-        y[0] = l[0]*np.cos(theta(0)) + l[1]*np.cos(phi(0)) + l[2]*np.cos(phi(1)) + l[3]*np.cos(theta(1))
-        y[1] = l[0]*np.sin(theta(0)) + l[1]*np.sin(phi(0)) + l[2]*np.sin(phi(1)) + l[3]*np.sin(theta(1))
+        y[0] = self.lenghts[0]*np.cos(self.theta(0)) + self.lenghts[1]*np.cos(phi(0)) + self.lenghts[2]*np.cos(phi(1)) + self.lenghts[3]*np.cos(self.theta(1))
+        y[1] = self.lenghts[0]*np.sin(self.theta(0)) + self.lenghts[1]*np.sin(phi(0)) + self.lenghts[2]*np.sin(phi(1)) + self.lenghts[3]*np.sin(self.theta(1))
 
         return y
     
-    def mechanismJacobian(self, phi, l):
+    def mechanismJacobian(self, phi):
+        # phi is in radians
+        # phi = [theta2, theta3]
+
         J = np.matrix([])
 
-        J[0,0] = -l[1]*np.sin(phi[0])
-        J[0,1] = -l[2]*np.sin(phi[1])
-        J[1,0] = l[1]*np.cos(phi[0])
-        J[1,1] = l[2]*np.cos(phi[1])
+        J[0,0] = -self.lenghts[1]*np.sin(phi[0])
+        J[0,1] = -self.lenghts[2]*np.sin(phi[1])
+        J[1,0] = self.lenghts[1]*np.cos(phi[0])
+        J[1,1] = self.lenghts[2]*np.cos(phi[1])
 
         return J
+    
+    def updateDriverPosition(self):
+        if(self.theta[0] >= self.linear_motion_range[0] & self.theta[0] < self.linear_motion_range[1]):
+            self.theta[0] = self.theta[0] + self.linear_motion_resolution
+
+    def computeKineamtics(self):
+        samples = np.linspace(self.linear_motion_range[0], self.linear_motion_range[1], np.round(1/self.linear_motion_resolution))
+
+        # Start Loop
+        for i in range(0, len(samples)):
+            self.theta[0] = samples[i]
+
+        
 
 class NewtonRaphson:
     # Attributes
     tol = 0
+    iteration_max = 0
 
-    def __init__(self, tolerance=0.001):
+    def __init__(self, tolerance = 0.001, max_iterations = 100):
         self.tol = tolerance
+        self.iteration_max = max_iterations
+
+    def feval(funcName, *args):
+        return eval(funcName)(*args)
+
+    def solve(self, f, J, x_0):
+        x = np.array([])
+        x.resize(len(x_0))
+
+        it = 0
+        err = np.norm(x - x_0)
+
+        while(err > self.tol):
+            func = self.feval(f, x_0)
+            Jac = self.feval(J, x_0)
+
+        return x
 
 
 def main():
