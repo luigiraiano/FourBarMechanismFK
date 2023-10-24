@@ -103,10 +103,6 @@ class FourBarMechanism:
         J[1,1] = self.lenghts[2]*np.cos(phi[1])
 
         return J
-    
-    def updateDriverPosition(self):
-        if(self.theta[0] >= self.linear_motion_range[0] & self.theta[0] < self.linear_motion_range[1]):
-            self.theta[0] = self.theta[0] + self.linear_motion_resolution
 
     def computeKineamtics(self):
         samples = np.linspace(self.linear_motion_range[0], self.linear_motion_range[1], np.round(1/self.linear_motion_resolution))
