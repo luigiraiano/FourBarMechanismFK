@@ -1,0 +1,7 @@
+lenghts: [0.1, 0.2, 0.3, 0.4] # [m]
+angles: [0, 0, 0, 0] # [deg] -> Initial Configuration
+linear_driver:
+  motion_range: [0, 10] # [deg] linear interval
+  resolution: 0.01 # [deg]
+  speed: 1 # [deg/s]
+  
