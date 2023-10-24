@@ -101,7 +101,7 @@ class NewtonRaphson:
     # Attributes
     tol = 0
 
-    def __init__(self, tolerance):
+    def __init__(self, tolerance=0.001):
         self.tol = tolerance
 
 
